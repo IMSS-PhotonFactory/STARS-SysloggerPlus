@@ -8,13 +8,14 @@ namespace SysloggerPlus
 {
     public class InfluxDB_Transfer
     {
-        private protected static readonly System.Net.Http.HttpClient wc = new System.Net.Http.HttpClient(new System.Net.Http.HttpClientHandler() { MaxConnectionsPerServer = 2 });
+        private protected static System.Net.Http.HttpClient wc;
 
         private protected Uri serverUri;
         private protected string tableName;
 
-        public InfluxDB_Transfer(string ServerIP, int ServerPort, string DbName, string TableName)
+        public InfluxDB_Transfer(string ServerIP, int ServerPort, string DbName, string TableName, int MaxConnection = 10)
         {
+            wc = new System.Net.Http.HttpClient(new System.Net.Http.HttpClientHandler() { MaxConnectionsPerServer = MaxConnection });
             serverUri = new Uri($"http://{ServerIP}:{ServerPort}/write?db={DbName}");
             tableName = TableName;
         }
@@ -92,7 +93,7 @@ namespace SysloggerPlus
 
     public class InfluxDB_Transfer_Vac : InfluxDB_Transfer
     {
-        public InfluxDB_Transfer_Vac(string ServerIP, int ServerPort, string DbName, string TableName) : base(ServerIP, ServerPort, DbName, TableName)
+        public InfluxDB_Transfer_Vac(string ServerIP, int ServerPort, string DbName, string TableName, int MaxConnection = 10) : base(ServerIP, ServerPort, DbName, TableName, MaxConnection)
         {
         }
 

@@ -45,10 +45,10 @@ namespace SysloggerPlus
                 switch (conf.Ope_Mode)
                 {
                     case OpeMode.Normal:
-                        influxdb = new InfluxDB_Transfer(conf.Influxdb_IP, conf.Influxdb_Port, conf.Influxdb_Database, conf.Influxdb_Table);
+                        influxdb = new InfluxDB_Transfer(conf.Influxdb_IP, conf.Influxdb_Port, conf.Influxdb_Database, conf.Influxdb_Table, conf.Influxdb_MaxConnection);
                         break;
                     case OpeMode.Vacuum:
-                        influxdb = new InfluxDB_Transfer_Vac(conf.Influxdb_IP, conf.Influxdb_Port, conf.Influxdb_Database, conf.Influxdb_Table);
+                        influxdb = new InfluxDB_Transfer_Vac(conf.Influxdb_IP, conf.Influxdb_Port, conf.Influxdb_Database, conf.Influxdb_Table, conf.Influxdb_MaxConnection);
                         break;
                     default:
                         break;
@@ -139,6 +139,7 @@ namespace SysloggerPlus
         public int Influxdb_Port;
         public string Influxdb_Database;
         public string Influxdb_Table;
+        public int Influxdb_MaxConnection;
 
         public OpeMode Ope_Mode;
 
@@ -158,6 +159,7 @@ namespace SysloggerPlus
             Influxdb_Port = 8086;
             Influxdb_Database = "test";
             Influxdb_Table = "debug";
+            Influxdb_MaxConnection = 10;
             Ope_Mode = OpeMode.Normal;
         }
     }
