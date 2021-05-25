@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace SysloggerPlus
 {
@@ -10,6 +11,7 @@ namespace SysloggerPlus
         static bool exitFlg = false;
 
         static string settingFilename = "config.xml";
+        static string nodelistFilename = "transfernodelist.txt";
 
         static void Main(string[] args)
         {
@@ -39,7 +41,12 @@ namespace SysloggerPlus
                 return;
             }
 
-            syslogger = new SysloggerPlus(setting);
+            var nodeList = new List<string>();
+
+            var nodelistfile = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), nodelistFilename);
+
+
+            syslogger = new SysloggerPlus(setting, nodelistfile);
 
             while (!exitFlg)
             {
