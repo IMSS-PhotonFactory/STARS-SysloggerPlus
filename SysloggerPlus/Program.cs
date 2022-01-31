@@ -12,7 +12,7 @@ namespace SysloggerPlus
 
         static string settingFilename = "config.xml";
         static string nodelistFilename = "transfernodelist.txt";
-        static string ignorelistFilename = "ignorenodelist.txt";
+        static string ignorelistFilename = "ignorewordlist.txt";
 
         static void Main(string[] args)
         {

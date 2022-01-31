@@ -21,7 +21,7 @@ namespace SysloggerPlus
         string nodelistfile;
         string mynode;
 
-        List<string> ignorenodelist = new List<string>();
+        List<string> ignorewordlist = new List<string>();
         string ignorelistfile;
 
         private int limitlength = 0;
@@ -46,7 +46,7 @@ namespace SysloggerPlus
             ReadNodeList(ref transfernodelist, nodelistfile);
 
             this.ignorelistfile = ignorelistfile;
-            ReadNodeList(ref ignorenodelist, ignorelistfile);
+            ReadNodeList(ref ignorewordlist, ignorelistfile);
 
             limitlength = conf.MaxLogLengthLimit;
 
@@ -124,7 +124,7 @@ namespace SysloggerPlus
             if(e.to == mynode && e.command == "reloadsetting")
             {
                 ReadNodeList(ref transfernodelist, nodelistfile);
-                ReadNodeList(ref ignorenodelist, ignorelistfile);
+                ReadNodeList(ref ignorewordlist, ignorelistfile);
 
                 stars.Send(e.from, "@reloadsetting Ok:");
                 return;
@@ -140,11 +140,9 @@ namespace SysloggerPlus
             {
                 var skip = false;
                 
-                foreach (var item in ignorenodelist)
+                foreach (var item in ignorewordlist)
                 {
-                    var matchstr = "^" + Regex.Escape(item).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
-
-                    if (Regex.IsMatch(e.from, matchstr, RegexOptions.IgnoreCase))
+                    if (e.allMessage.Contains(item))
                     {
                         skip = true;
                         break;
