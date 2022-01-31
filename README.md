@@ -6,7 +6,7 @@ STARS client for logging all STARS message and transfer to InfluxDB.
 
 dotnet SysloggerPlus.dll
 
-config.xml, transfernodelist.txt and ignorenodelist.txt will be created at the first boot time.
+config.xml, transfernodelist.txt and ignorewordlist.txt will be created at the first boot time.
 
 # config.xml
 
@@ -35,6 +35,10 @@ term2
 term3.sub  
 term4.*  
   
-# ignorenodelist.txt
+# ignorewordlist.txt
   
-nodename list for log ignorling. (one node in one row)
+keywords list for log ignorling. (one word in one row)
+
+e.g. 
+term1  
+term2>term3
