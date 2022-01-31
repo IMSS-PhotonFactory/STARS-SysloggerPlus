@@ -12,6 +12,7 @@ namespace SysloggerPlus
 
         static string settingFilename = "config.xml";
         static string nodelistFilename = "transfernodelist.txt";
+        static string ignorelistFilename = "ignorenodelist.txt";
 
         static void Main(string[] args)
         {
@@ -44,9 +45,10 @@ namespace SysloggerPlus
             var nodeList = new List<string>();
 
             var nodelistfile = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), nodelistFilename);
+            var ignorelistfile = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), ignorelistFilename);
 
 
-            syslogger = new SysloggerPlus(setting, nodelistfile);
+            syslogger = new SysloggerPlus(setting, nodelistfile, ignorelistfile);
 
             while (!exitFlg)
             {

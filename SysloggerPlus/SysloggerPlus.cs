@@ -21,6 +21,11 @@ namespace SysloggerPlus
         string nodelistfile;
         string mynode;
 
+        List<string> ignorenodelist = new List<string>();
+        string ignorelistfile;
+
+        private int limitlength = 0;
+
         private bool disposedValue;
 
         public bool IsConnected
@@ -31,14 +36,19 @@ namespace SysloggerPlus
             }
         }
 
-        public SysloggerPlus(ProgramSetting conf, string nodelistfile)
+        public SysloggerPlus(ProgramSetting conf, string nodelistfile, string ignorelistfile)
         {
             useLog = conf.Use_Logfile;
             useDb = conf.Use_Influxdb;
 
             mynode = conf.STARS_Node;
             this.nodelistfile = nodelistfile;
-            ReadNodeList();
+            ReadNodeList(ref transfernodelist, nodelistfile);
+
+            this.ignorelistfile = ignorelistfile;
+            ReadNodeList(ref ignorenodelist, ignorelistfile);
+
+            limitlength = conf.MaxLogLengthLimit;
 
             if (conf.Logfile_Path != "")
             {
@@ -82,27 +92,27 @@ namespace SysloggerPlus
             }
         }
 
-        private void ReadNodeList()
+        private void ReadNodeList(ref List<string> list, string filename)
         {
-            transfernodelist = new List<string>();
+            list = new List<string>();
 
-            if (System.IO.File.Exists(nodelistfile))
+            if (System.IO.File.Exists(filename))
             {
-                using (System.IO.StreamReader sr = new System.IO.StreamReader(nodelistfile))
+                using (System.IO.StreamReader sr = new System.IO.StreamReader(filename))
                 {
                     while (sr.Peek() > -1)
                     {
                         var temp = sr.ReadLine();
                         if (temp != "")
                         {
-                            transfernodelist.Add(temp);
+                            list.Add(temp);
                         }
                     }
                 }
             }
             else
             {
-                System.IO.FileStream fs = System.IO.File.Create(nodelistfile);
+                System.IO.FileStream fs = System.IO.File.Create(filename);
                 fs.Close();
             }
         }
@@ -113,7 +123,9 @@ namespace SysloggerPlus
 
             if(e.to == mynode && e.command == "reloadsetting")
             {
-                ReadNodeList();
+                ReadNodeList(ref transfernodelist, nodelistfile);
+                ReadNodeList(ref ignorenodelist, ignorelistfile);
+
                 stars.Send(e.from, "@reloadsetting Ok:");
                 return;
             }
@@ -126,7 +138,30 @@ namespace SysloggerPlus
 
             if (useLog)
             {
-                write_file(e.allMessage, rcvtime);
+                var skip = false;
+                
+                foreach (var item in ignorenodelist)
+                {
+                    var matchstr = "^" + Regex.Escape(item).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
+
+                    if (Regex.IsMatch(e.from, matchstr, RegexOptions.IgnoreCase))
+                    {
+                        skip = true;
+                        break;
+                    }
+                }
+
+                if (!skip)
+                {
+                    if(limitlength == 0 | e.allMessage.Length < limitlength)
+                    {
+                        write_file(e.allMessage, rcvtime);
+                    }
+                    else
+                    {
+                        write_file(e.allMessage.Substring(0, limitlength), rcvtime);
+                    }
+                }
             }
 
             if(useDb)
@@ -144,6 +179,7 @@ namespace SysloggerPlus
                         if (Regex.IsMatch(e.from, matchstr, RegexOptions.IgnoreCase))
                         {
                             influxdb.Write_StarsLog(e.allMessage, rcvtime);
+                            break;
                         }
                     }
                 }
@@ -203,6 +239,8 @@ namespace SysloggerPlus
         public int Influxdb_MaxConnection;
 
         public OpeMode Ope_Mode;
+
+        public int MaxLogLengthLimit = 0;
 
         public ProgramSetting()
         {
